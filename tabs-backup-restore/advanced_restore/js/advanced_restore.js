@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', function () {
   initbackupList (false /*showAll*/);
 });
 
+function compareBackupListItemsByName (listItemA, listItemB) {
+  var textA = listItemA.name.toUpperCase();
+  var textB = listItemB.name.toUpperCase();
+  return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+}
+
 function initbackupList (showAll, callback) {
   var backupsDiv          = $('#backupsDiv');
   var showOlderBackupsDiv = $('#showOlderBackupsDiv');
@@ -25,8 +31,8 @@ function initbackupList (showAll, callback) {
     }
 
     var named, unnamed;
-    named      = backupList.filter(backup => !!backup.name).reverse();
-    unnamed    = backupList.filter(backup =>  !backup.name).reverse();
+    named      = backupList.filter(listItem => !!listItem.name).sort(compareBackupListItemsByName);  // sort by name alphabetically (ascending)
+    unnamed    = backupList.filter(listItem =>  !listItem.name).reverse();                           // sort by creation timestamp (descending, newest first)
     backupList = ([]).concat(named, unnamed);
     named      = null;
     unnamed    = null;

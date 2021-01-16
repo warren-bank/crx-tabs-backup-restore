@@ -336,7 +336,7 @@ function deleteBackup (backupListItem, callback) {
       }
 
       var backupList    = items.backups_list;
-      var backupListIDs = backupList.map(backup => backup.id);
+      var backupListIDs = backupList.map(listItem => listItem.id);
       var index         = backupListIDs.indexOf(backupID);
       if (index >= 0) {
         backupList.splice(index, 1);
