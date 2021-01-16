@@ -1,0 +1,12 @@
+https://cdnjs.com/libraries/jquery
+https://cdnjs.com/libraries/jquery/2.2.4
+https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js
+
+https://cdnjs.com/libraries/twitter-bootstrap
+https://cdnjs.com/libraries/twitter-bootstrap/3.4.1
+https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js
+https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css
+
+https://cdnjs.com/libraries/bootbox.js
+https://cdnjs.com/libraries/bootbox.js/4.4.0
+https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js

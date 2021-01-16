@@ -1,0 +1,21 @@
+--------------------------------------------------------------------------------
+
+pages that render backups to UI:
+* popup.html
+* advanced_restore.html
+
+changes needed to UI:
+* click name to edit / blur name to save
+* sort order of backups
+  - named:
+    * prioritize by showing at top of list
+    * sort alphabetically by name (ascending)
+  - unnamed:
+    * show after all named backups
+    * sort by date (descending)
+
+--------------------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------------------

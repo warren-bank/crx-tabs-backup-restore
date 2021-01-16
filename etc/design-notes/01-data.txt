@@ -1,0 +1,31 @@
+-------------------------------------------------------------------------------- original:
+
+items stored in 'chrome.storage.local':
+
+* items['backups_list']
+  - array of the names of every backup
+    * note: the name of a backup is its unique identifier
+* items[$backup_name]
+  - a data object that represents one single backup
+    * keys: {
+        "isAutomatic": (boolean),
+        "totNumTabs":  (number),
+        "windows": [{
+          "tabs": [{
+            "title": (string),
+            "url":   (string)
+          }]
+        }]
+      }
+
+-------------------------------------------------------------------------------- updates:
+
+* items['backups_list'] = [{id, name}]
+
+if the "name" attribute has a value:
+  * backup is "named"
+  * backup is safe from automatic deletion
+  * ui groups this backup along with all other "named" backups and displays them first
+  * ui displays the value of this "name" attribute instead of the backup's unique identifier (ex: "2021-01-14 18:17:41")
+
+--------------------------------------------------------------------------------

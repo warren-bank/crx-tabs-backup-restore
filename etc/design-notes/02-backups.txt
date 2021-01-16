@@ -1,0 +1,43 @@
+--------------------------------------------------------------------------------
+
+all management of backups occurs in:
+* background.js
+
+changes needed:
+* update garbage collection to exclude named backups
+
+-------------------------------------------------------------------------------- original:
+
+function onAlarm (alarm)
+  => backupNow()
+    => callback()
+      => popup.insertBackupItem()
+         popup.updateStorageInfo()
+
+function backupNow(isAutomatic, backupName, callbackDone)
+  => callbackDone()
+     if (backupsList.length > parseInt(localStorage.prefsMaxBackupItems)) {
+       deleteOldestBackup();
+     }
+
+function deleteOldestBackup ()
+  => deleteBackup (backupName, callback)
+* coding is very bad
+* basically, it uses recursion to delete backups one at a time.. beginning with:
+    items['backups_list'][0]
+
+notes:
+* all calls to backupNow pass a backupName that results from:
+    date_format(new Date())  // formattedDate
+* backupsList is an array holding the names of all backups
+
+-------------------------------------------------------------------------------- updates:
+
+const unnamed     = backupsList.filter(backup => !backup.name)
+const max_allowed = parseInt(localStorage.prefsMaxBackupItems)
+const num_delete  = (max_allowed - unnamed.length)
+
+if (num_delete > 0)
+  deleteOldestBackup(unnamed, num_delete)
+
+--------------------------------------------------------------------------------
