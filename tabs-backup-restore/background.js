@@ -86,8 +86,8 @@ function initAlarm () {
 
   var timerMinutes = parseInt(localStorage.prefsBackupTimer);
 
-  // Apparantely once the app is on the Chrome Store it's not possible
-  // to create alarms that have period less than 5 minutes..
+  // apparently once the extension is published in the Chrome Store,
+  // it's no-longer possible to create alarms that have a period of less than 5 minutes..
   if (timerMinutes < 5) {
     var timerMillis = timerMinutes * 60 * 1000;
     localStorage.lastTimerIntervalId = setInterval (onAlarm, timerMillis);
