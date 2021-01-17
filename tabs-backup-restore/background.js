@@ -247,6 +247,13 @@ function backupNow(isAutomatic, backupID, callbackDone) {
   });
 }
 
+// keep backups in ascending chronological order (oldest first)
+function compareBackupListItemsById (listItemA, listItemB) {
+  var textA = listItemA.id.toUpperCase();
+  var textB = listItemB.id.toUpperCase();
+  return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+}
+
 function saveBackups (backupListItemArray, fullBackupArray, callbackDone) {
   var storageSetValues = {};
   var backupListItem, backupID, fullBackup;
@@ -311,6 +318,9 @@ function saveBackups (backupListItemArray, fullBackupArray, callbackDone) {
 
           backupList = backupListItemArray;
         }
+
+        // maintain sort order
+        backupList.sort(compareBackupListItemsById);
 
         chrome.storage.local.set({'backups_list': backupList}, function () {
           if (chrome.runtime.lastError) {
