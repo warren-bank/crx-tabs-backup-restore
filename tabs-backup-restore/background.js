@@ -217,6 +217,7 @@ function backupNow(isAutomatic, backupID, callbackDone) {
       windowToBackup = window_list[i];
       windowTabs     = windowToBackup.tabs;
       bkpWindow = {
+        incognito: !!windowToBackup.incognito,
         tabs: []
       };
 
@@ -439,6 +440,7 @@ function restoreNow(backupListItem) {
       }
 
       var windowProperties = {
+        incognito: !!windowToRestore.incognito,
         url: urlsToOpen
       };
 

@@ -412,15 +412,17 @@ function menu_RestoreSelected (event) {
 }
 
 function menu_RestoreSelected_Real () {
-  var selectedCheckboxes       = $('input:checked');
+  var selectedCheckboxes       = $('input[type="checkbox"]:checked');
   var restoreToMultipleWindows = $('#restoreSelectedRadioMultipleWindows').is(':checked');
 
   var allUrls     = [];
   var windows     = {};
   var windowsKeys = [];
 
-  for (var i = 0; i < selectedCheckboxes.length; i++) {
-    var checkbox = selectedCheckboxes[i];
+  var i, checkbox, tabUrl, windowIdx, bkpName, key, urls, incognito, windowProperties;
+
+  for (i = 0; i < selectedCheckboxes.length; i++) {
+    checkbox = selectedCheckboxes[i];
 
     if (
       (checkbox.tbrBackupName  === undefined) ||
@@ -432,26 +434,36 @@ function menu_RestoreSelected_Real () {
 
     //console.log('Restoring ' + checkbox.tbrBackupName + ' --> ' + checkbox.tbrWindowIndex);
 
-    var tabUrl    = checkbox.tbrTabUrl;
-    var windowIdx = checkbox.tbrWindowIndex;
-    var bkpName   = checkbox.tbrBackupName;
-    var key       = bkpName + '_' + windowIdx;
+    tabUrl    = checkbox.tbrTabUrl;
+    windowIdx = checkbox.tbrWindowIndex;
+    bkpName   = checkbox.tbrBackupName;
+    key       = bkpName + '_' + windowIdx;
 
     if (!(key in windows)) {
       windows[key] = [];
-      windowsKeys.push(key);
+      windowsKeys.push({key, windowIdx});
     }
 
     windows[key].push(tabUrl);
     allUrls.push(tabUrl);
   }
 
-  if (restoreToMultipleWindows) {
-    for (var i = 0; i < windowsKeys.length; i++) {
-      var key  = windowsKeys[i];
-      var urls = windows[key];
+  // sanity check: return if empty datasets
+  if (!windowsKeys.length || !allUrls.length) {
+    return;
+  }
 
-      var windowProperties = {
+  if (restoreToMultipleWindows) {
+    for (i = 0; i < windowsKeys.length; i++) {
+      key  = windowsKeys[i].key;
+      urls = windows[key];
+
+      // incognito:
+      checkbox  = $(`input[type="checkbox"][data-window-index="${ windowsKeys[i].windowIdx }"]`).get(0);
+      incognito = checkbox && checkbox.tbrIsIncognito;
+
+      windowProperties = {
+        incognito,
         url: urls
       };
 
@@ -459,7 +471,20 @@ function menu_RestoreSelected_Real () {
       });
     }
   } else {
-    var windowProperties = {
+    // incognito: only true if ALL selected tabs belong to incognito windows
+    incognito = windowsKeys.reduce(
+      function (accumulator, currentValue) {
+        if (accumulator) {
+          checkbox    = $(`input[type="checkbox"][data-window-index="${ currentValue.windowIdx }"]`).get(0);
+          accumulator = checkbox && checkbox.tbrIsIncognito;
+        }
+        return accumulator;
+      },
+      true
+    );
+
+    windowProperties = {
+      incognito,
       url: allUrls
     };
 
@@ -473,7 +498,7 @@ function menu_ClearSelection (event) {
   event.stopPropagation();
   event.stopImmediatePropagation();
 
-  var selectedCheckboxes = $('input:checked');
+  var selectedCheckboxes = $('input[type="checkbox"]:checked');
   for (var i = 0; i < selectedCheckboxes.length; i++) {
     var checkbox = selectedCheckboxes[i];
     if (checkbox.type == 'checkbox') {
@@ -485,7 +510,7 @@ function menu_ClearSelection (event) {
 }
 
 function updateRestoreSelectedDiv () {
-  var selectedCheckboxes = $('input:checked');
+  var selectedCheckboxes = $('input[type="checkbox"]:checked');
 
   var numSelectedTabs = 0;
   var numSelectedWindows = 0;
@@ -614,6 +639,8 @@ function showAdvancedRestoreFor (backupListItem) {
       checkboxWindowElem.id = checkboxWindowId;
       checkboxWindowElem.className = 'regular-checkbox parentIgnoreClick';
       checkboxWindowElem.tbrIsWindow = true;
+      checkboxWindowElem.tbrIsIncognito = !!windowToRestore.incognito;
+      checkboxWindowElem.setAttribute('data-window-index', '' + i);
 
       var checkboxWindowLabelElem = document.createElement('label')
       checkboxWindowLabelElem.className = 'parentIgnoreClick';
@@ -624,7 +651,7 @@ function showAdvancedRestoreFor (backupListItem) {
 
       var windowTitleSpan = document.createElement('span');
       windowTitleSpan.innerHTML = '' +
-        `<span style="font-weight: bold">Window ${i+1}</span>` +
+        `<span style="font-weight: bold">Window ${i+1}${ windowToRestore.incognito ? ' (incognito)' : '' }</span>` +
         `<span style="float: right; font-size: 11px;">Tabs: ${windowTabs.length}</span>`;
 
       windowTitleDiv.appendChild(checkboxWindowElem);
