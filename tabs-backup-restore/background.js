@@ -75,51 +75,61 @@ function tabsEdited (isImportant) {
   localStorage.lastTabsEdit = millis;
 }
 
+var BACKUP_ALARM_NAME = 'backup_alarm';
+
+function onAlarm (alarm) {
+  // undefined when called by setInterval timer
+  if (
+    (alarm === undefined) ||
+    (
+      (alarm instanceof Object) &&
+      (alarm !== null)          &&
+      (alarm.name === BACKUP_ALARM_NAME)
+    )
+  ) {
+    var d = new Date();
+    var formattedDate = date_format (d);
+
+    //console.log('Alarm {' + alarm + '} fired up: ' + formattedDate + ' last tabs edit: ' + localStorage.lastTabsEdit + ' last backup time: ' + localStorage.lastBackupTime);
+
+    if (localStorage.lastBackupTime != localStorage.lastTabsEdit) {
+      backupNow(true, formattedDate, function(success, backupListItem, fullBackup) {
+        // automatic backup completed
+
+        if (success) {
+          insertBackupItems ([backupListItem], [fullBackup], true /*insertAtBeginning*/, true /*doAnimation*/);
+        }
+      });
+
+      localStorage.lastBackupTime = localStorage.lastTabsEdit;
+    }
+  }
+}
+
 function initAlarm () {
   //console.log('initAlarm');
 
-  var BACKUP_ALARM_NAME = 'backup_alarm';
-
   // Clear any previous alarm
   chrome.alarms.clearAll();
-  clearInterval(parseInt(localStorage.lastTimerIntervalId));
+  chrome.alarms.onAlarm.removeListener(onAlarm);
+  clearInterval(localStorage.lastTimerIntervalId);
 
   var timerMinutes = parseInt(localStorage.prefsBackupTimer);
 
-  // apparently once the extension is published in the Chrome Store,
-  // it's no-longer possible to create alarms that have a period of less than 5 minutes..
+  // minimum alarm delay is 1 minute.
+  // apparently once the extension is published in the Chrome Store, it's no-longer possible to create alarms that have a period of less than 5 minutes.
   if (timerMinutes < 5) {
+    //console.log('Created interval alarm - id: ' + localStorage.lastTimerIntervalId + ' time: ' + timerMinutes + ' minutes');
     var timerMillis = timerMinutes * 60 * 1000;
     localStorage.lastTimerIntervalId = setInterval (onAlarm, timerMillis);
-    //console.log('Created interval alarm - id: ' + localStorage.lastTimerIntervalId + ' time: ' + timerMinutes + ' minutes');
   } else {
     //console.log('Creating chrome.alarm "backup_alarm" - time: ' + timerMinutes + ' minutes');
-    chrome.alarms.create(BACKUP_ALARM_NAME, {periodInMinutes: timerMinutes});
+    chrome.alarms.create(BACKUP_ALARM_NAME, {periodInMinutes: timerMinutes, delayInMinutes: 1});
+    chrome.alarms.onAlarm.addListener(onAlarm);
   }
 }
 
 initAlarm();
-
-function onAlarm (alarm) {
-  var d = new Date();
-  var formattedDate = date_format (d);
-
-  //console.log('Alarm {' + alarm + '} fired up: ' + formattedDate + ' last tabs edit: ' + localStorage.lastTabsEdit + ' last backup time: ' + localStorage.lastBackupTime);
-
-  if (localStorage.lastBackupTime != localStorage.lastTabsEdit) {
-    backupNow(true, formattedDate, function(success, backupListItem, fullBackup) {
-      // automatic backup completed
-
-      if (success) {
-        insertBackupItems ([backupListItem], [fullBackup], true /*insertAtBeginning*/, true /*doAnimation*/);
-      }
-    });
-
-    localStorage.lastBackupTime = localStorage.lastTabsEdit;
-  }
-}
-
-chrome.alarms.onAlarm.addListener(onAlarm);
 
 function date_prependZero (val) {
   return val < 10 ? '0' + val : '' + val;
