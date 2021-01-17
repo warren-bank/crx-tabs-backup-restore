@@ -27,11 +27,6 @@ body {
   position: relative;
 }
 
-#contentWrapper {
-  margin-left: -50px;
-  margin-right: 50px;
-}
-
 a {
   cursor: hand;
   cursor: pointer;
@@ -329,9 +324,9 @@ label {
   <body>
     <div id="content">
       <div id="contentWrapper">
-        <img src="icon/icon_48.png" style="border: 0; padding: 10px;" /><b>Tabs Backup &amp; Restore - Advanced</b>
+        <img src="icon/icon_48.png" style="border: 0; padding-left: 8px; padding-right: 8px; width: 48px; height: 48px" /><b>Tabs Backup &amp; Restore - Advanced</b>
 
-        <a id="menuItem_options" style="position: absolute; right: 4px; top: 12px;">Options<img src="popup/img/options.png" style="width: 24px;" /></a>
+        <a id="menuItem_options" style="position: absolute; right: 4px; top: 12px;">Options<img src="popup/img/options.png" style="border: 0; width: 24px; height: 24px" /></a>
 
         <div id="smallDescription">
           With <i>Advanced Restore</i> you can restore a custom selection of your backups!<br />
@@ -353,6 +348,11 @@ label {
 
         <div id="backupsListTitle">
           Your Backups
+
+          <div style="position: absolute; right: 0px; top: 2px; white-space: nowrap">
+            <a id="data-export"><img src="advanced_restore/img/data-export.png" title="Export Backups" style="border: 0; width: 24px; height: 24px"></a>
+            <a id="data-import"><img src="advanced_restore/img/data-import.png" title="Import Backups" style="border: 0; width: 24px; height: 24px"></a>
+          </div>
         </div>
 
         <div id="backupsDiv"></div>
@@ -371,7 +371,7 @@ label {
           </div>
 
           <div id="restoreSelectedDiv">
-            Restore selected <img src="icon/icon_48.png" style="width: 26px;" />
+            Restore selected <img src="icon/icon_48.png" style="border: 0; width: 26px; height: 26px" />
           </div>
 
           <div id="restoreSelectedRadio">

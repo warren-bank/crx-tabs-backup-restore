@@ -394,6 +394,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     $('#restoreSelectedRadioMultipleWindows').prop('checked', true);
   });
+
+  document.getElementById('data-export').addEventListener('click', menu_ExportJsonData);
+  document.getElementById('data-import').addEventListener('click', menu_ImportJsonData);
 });
 
 function menu_RestoreSelected (event) {
@@ -710,5 +713,77 @@ function showAdvancedRestoreFor (backupListItem) {
     var backupTitleDiv = document.getElementById(backupTitleDivId);
     backupTitleDiv.appendChild(elem);
     $('#' + elem.id).hide().slideDown();
+  });
+}
+
+function menu_ExportJsonData (event) {
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+
+  chrome.extension.getBackgroundPage().getExportJsonData(function(json) {
+    var anchor   = document.createElement('a');
+    var blob     = new Blob([json], {type: 'octet/stream'});
+    var filename = 'full_export.json';
+    var url      = window.URL.createObjectURL(blob);
+    anchor.setAttribute('href', url);
+    anchor.setAttribute('download', filename);
+    anchor.click();
+  });
+}
+
+function menu_ImportJsonData (event) {
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+
+  var dialog = bootbox.dialog({
+    title:   'Select Data File To Import:',
+    message: '<div></div>'
+  });
+
+  var readFile = function (event) {
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    var input = event.target;
+    var files = input.files;
+
+    if (files.length) {
+      var reader = new FileReader();
+
+      reader.onload = function(){
+        var json = reader.result;
+
+        chrome.extension.getBackgroundPage().importJsonData(json, function(isSuccess, backupListItemArray, fullBackupArray) {
+          if (isSuccess) {
+            dialog.modal('hide');
+
+            // force a page refresh to view the newly imported backups
+            window.location.reload();
+          }
+          else {
+            dialog.find('.bootbox-body').empty().append($('<code>Import Failed!</code>'));
+
+            setTimeout(
+              function(){
+                dialog.modal('hide');
+              },
+              3000
+            );
+          }
+        });
+      };
+      reader.readAsText(files[0]);
+    }
+  };
+
+  var input = document.createElement('input');
+  input.setAttribute('type',   'file');
+  input.setAttribute('accept', 'text/plain, application/json, .txt, .json');
+  input.addEventListener('change', readFile);
+
+  dialog.init(function(){
+    dialog.find('.bootbox-body').empty().append(input);
   });
 }
