@@ -198,7 +198,7 @@ function backupNow(isAutomatic, backupID, callbackDone) {
   }
   isCreatingBackup = true;
 
-  chrome.windows.getAll({populate : true}, function (window_list) {
+  chrome.windows.getAll({windowTypes: ['normal'], populate : true}, function (window_list) {
     var backupListItem = {id: backupID, name: null};
 
     var fullBackup = {
