@@ -395,6 +395,8 @@ document.addEventListener('DOMContentLoaded', function () {
     $('#restoreSelectedRadioMultipleWindows').prop('checked', true);
   });
 
+  document.getElementById('deleteAllBackups').addEventListener('click', menu_DeleteAllBackups);
+
   document.getElementById('data-export').addEventListener('click', menu_ExportJsonData);
   document.getElementById('data-import').addEventListener('click', menu_ImportJsonData);
 });
@@ -740,6 +742,24 @@ function showAdvancedRestoreFor (backupListItem) {
     var backupTitleDiv = document.getElementById(backupTitleDivId);
     backupTitleDiv.appendChild(elem);
     $('#' + elem.id).hide().slideDown();
+  });
+}
+
+function menu_DeleteAllBackups (event) {
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+
+  chrome.extension.getBackgroundPage().deleteAllBackups(function(success) {
+    if (success) {
+      $('#backupsDiv').slideUp(400, function() {
+        // force a page refresh
+        window.location.reload();
+      });
+    }
+    else {
+      bootbox.alert('An error occured while deleting the backups!');
+    }
   });
 }
 

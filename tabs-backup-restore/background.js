@@ -486,6 +486,14 @@ function renameBackup (backupListItem, name, callback) {
   });
 }
 
+function deleteAllBackups (callbackDone) {
+  chrome.storage.local.clear(function() {
+    var success = !chrome.runtime.lastError;
+
+    callbackDone(success);
+  });
+}
+
 function getExportJsonData (callbackDone) {
   chrome.storage.local.get(null, function(items) {
     var json = JSON.stringify(items, null, 2);
