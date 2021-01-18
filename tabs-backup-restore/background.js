@@ -448,13 +448,64 @@ function restoreNow(backupListItem) {
         urlsToOpen.push(tabUrl);
       }
 
-      var windowProperties = {
-        incognito: !!windowToRestore.incognito,
-        url: urlsToOpen
-      };
-
-      chrome.windows.create(windowProperties, function(createdWindow) {
+      createWindow(urlsToOpen, windowToRestore.incognito, function(createdWindow) {
       });
+    }
+  });
+}
+
+var tabsLoading = [];
+
+function onTabUpdate (tabId, changeInfo, tab) {
+  if (!tabId || !changeInfo || !changeInfo.url || !tab) {
+    return;
+  }
+
+  var index = tabsLoading.indexOf(tabId);
+  if (index === -1) {
+    return;
+  }
+
+  tabsLoading.splice(index, 1);
+
+  // lazy load non-visible tabs to reduce/defer CPU and RAM usage.
+  // similar to:
+  //   https://github.com/jman/lazy_tab
+
+  if (!tab.discarded && !tab.pinned && !tab.active) {
+    try {
+      chrome.tabs.discard( tab.id );
+    }
+    catch(error) {}
+  }
+}
+
+chrome.tabs.onUpdated.addListener(onTabUpdate);
+
+function createWindow (urlsToOpen, isIncognito, callback) {
+  if (!urlsToOpen || !Array.isArray(urlsToOpen) || !urlsToOpen.length) {
+    if (callback) {
+      callback(null);
+    }
+    return;
+  }
+
+  var windowProperties = {
+    url:       urlsToOpen,
+    incognito: !!isIncognito,
+    type:      'normal',
+    state:     'maximized'
+  };
+
+  chrome.windows.create(windowProperties, function(createdWindow) {
+    if (createdWindow && createdWindow.tabs) {
+      for (var i = 0; i < createdWindow.tabs.length; i++) {
+        tabsLoading.push( createdWindow.tabs[i].id );
+      }
+    }
+
+    if (callback) {
+      callback(createdWindow);
     }
   });
 }

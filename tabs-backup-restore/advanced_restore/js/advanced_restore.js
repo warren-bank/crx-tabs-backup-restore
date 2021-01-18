@@ -464,12 +464,7 @@ function menu_RestoreSelected_Real () {
       checkbox  = $(`input[type="checkbox"][data-window-index="${ windowsKeys[i].windowIdx }"]`).get(0);
       incognito = checkbox && checkbox.tbrIsIncognito;
 
-      windowProperties = {
-        incognito,
-        url: urls
-      };
-
-      chrome.windows.create(windowProperties, function(createdWindow) {
+      chrome.extension.getBackgroundPage().createWindow(urls, incognito, function(createdWindow) {
       });
     }
   } else {
@@ -485,12 +480,7 @@ function menu_RestoreSelected_Real () {
       true
     );
 
-    windowProperties = {
-      incognito,
-      url: allUrls
-    };
-
-    chrome.windows.create(windowProperties, function(createdWindow) {
+    chrome.extension.getBackgroundPage().createWindow(allUrls, incognito, function(createdWindow) {
     });
   }
 }
