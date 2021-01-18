@@ -17,35 +17,35 @@ function setSelectValue (selectId, value) {
   for (var i = 0; i < select.children.length; i++) {
     var child = select.children[i];
     if (child.value == value) {
-      child.selected = "true";
+      child.selected = 'true';
       break;
     }
   }
 }
 
 function saveOptions () {
-  var backupPeriodMinutes = getSelectValue("prefsSelectBackupPeriod");
+  var backupPeriodMinutes = getSelectValue('prefsSelectBackupPeriod');
   localStorage.prefsBackupTimer = backupPeriodMinutes;
 
-  var backupMaxItems = getSelectValue("prefsSelectMaxBackups");
+  var backupMaxItems = getSelectValue('prefsSelectMaxBackups');
   localStorage.prefsMaxBackupItems = backupMaxItems;
 
   // Re-initialize the backup alarm
   chrome.extension.getBackgroundPage().initAlarm();
 
   // Update status to let user know options were saved.
-  var status = document.getElementById("statusDiv");
-  status.innerHTML = "Options Saved";
+  var status = document.getElementById('statusDiv');
+  status.innerHTML = 'Options Saved';
   setTimeout(function() {
-    status.innerHTML = "";
+    status.innerHTML = '';
   }, 3000);
 }
 
 function restoreToDefault() {
   // same values are initialized by background.js
 
-  setSelectValue ("prefsSelectBackupPeriod", "5");
-  setSelectValue ("prefsSelectMaxBackups", "30");
+  setSelectValue ('prefsSelectBackupPeriod', '5');
+  setSelectValue ('prefsSelectMaxBackups', '30');
 
   saveOptions();
 }
@@ -54,6 +54,6 @@ function restoreOptions() {
   var backupPeriodMinutes = localStorage.prefsBackupTimer;
   var backupMaxItems      = localStorage.prefsMaxBackupItems;
 
-  setSelectValue ("prefsSelectBackupPeriod", backupPeriodMinutes);
-  setSelectValue ("prefsSelectMaxBackups",   backupMaxItems);
+  setSelectValue ('prefsSelectBackupPeriod', backupPeriodMinutes);
+  setSelectValue ('prefsSelectMaxBackups',   backupMaxItems);
 }

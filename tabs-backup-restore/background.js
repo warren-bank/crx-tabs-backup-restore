@@ -114,16 +114,24 @@ function initAlarm () {
   chrome.alarms.onAlarm.removeListener(onAlarm);
   clearInterval(localStorage.lastTimerIntervalId);
 
-  var timerMinutes = parseInt(localStorage.prefsBackupTimer);
+  var timerMinutes = parseInt(localStorage.prefsBackupTimer, 10);
 
-  // minimum alarm delay is 1 minute.
-  // apparently once the extension is published in the Chrome Store, it's no-longer possible to create alarms that have a period of less than 5 minutes.
-  if (timerMinutes < 5) {
+  if (timerMinutes <= 0) {
+    // disabled
+    return;
+  }
+  else if (timerMinutes < 5) {
     //console.log('Created interval alarm - id: ' + localStorage.lastTimerIntervalId + ' time: ' + timerMinutes + ' minutes');
+
+    // apparently once the extension is published in the Chrome Store, it's no-longer possible to create alarms that have a period of less than 5 minutes.
+    // minimum alarm delay is 1 minute.
+
     var timerMillis = timerMinutes * 60 * 1000;
     localStorage.lastTimerIntervalId = setInterval (onAlarm, timerMillis);
-  } else {
+  }
+  else {
     //console.log('Creating chrome.alarm "backup_alarm" - time: ' + timerMinutes + ' minutes');
+
     chrome.alarms.create(BACKUP_ALARM_NAME, {periodInMinutes: timerMinutes, delayInMinutes: 1});
     chrome.alarms.onAlarm.addListener(onAlarm);
   }
@@ -347,7 +355,7 @@ function saveBackups (backupListItemArray, fullBackupArray, callbackDone) {
             var unnamed, max_allowed, num_delete, unnamed_delete;
 
             unnamed     = backupList.filter(listItem => !listItem.name);
-            max_allowed = parseInt(localStorage.prefsMaxBackupItems);
+            max_allowed = parseInt(localStorage.prefsMaxBackupItems, 10);
             num_delete  = (unnamed.length - max_allowed);
 
             if (num_delete > 0) {
