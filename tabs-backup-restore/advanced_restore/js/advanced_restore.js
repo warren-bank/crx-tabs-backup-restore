@@ -768,14 +768,33 @@ function menu_ExportJsonData (event) {
   event.stopPropagation();
   event.stopImmediatePropagation();
 
-  chrome.extension.getBackgroundPage().getExportJsonData(function(json) {
-    var anchor   = document.createElement('a');
-    var blob     = new Blob([json], {type: 'octet/stream'});
-    var filename = 'full_export.json';
-    var url      = window.URL.createObjectURL(blob);
-    anchor.setAttribute('href', url);
-    anchor.setAttribute('download', filename);
-    anchor.click();
+  bootbox.prompt({
+    title: "Export Backups",
+    message: '<p>Include:</p>',
+    inputType: 'radio',
+    inputOptions: [{
+      text: 'All (Named + Unnamed)',
+      value: '1',
+    },
+    {
+      text: 'Named Only',
+      value: '2',
+    }],
+    callback: function (result) {
+      if (result !== null) {
+        var namedBackupsOnly = (result === '2');
+
+        chrome.extension.getBackgroundPage().getExportJsonData(namedBackupsOnly, function(json) {
+          var anchor   = document.createElement('a');
+          var blob     = new Blob([json], {type: 'octet/stream'});
+          var filename = 'full_export.json';
+          var url      = window.URL.createObjectURL(blob);
+          anchor.setAttribute('href', url);
+          anchor.setAttribute('download', filename);
+          anchor.click();
+        });
+      }
+    }
   });
 }
 

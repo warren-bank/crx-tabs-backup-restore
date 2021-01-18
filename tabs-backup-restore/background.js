@@ -494,9 +494,38 @@ function deleteAllBackups (callbackDone) {
   });
 }
 
-function getExportJsonData (callbackDone) {
+function getExportJsonData (namedBackupsOnly, callbackDone) {
   chrome.storage.local.get(null, function(items) {
-    var json = JSON.stringify(items, null, 2);
+    var filtered = {
+      "backups_list": []
+    };
+    var json;
+
+    if (!items || !Array.isArray(items.backups_list) || !items.backups_list.length) {
+      json = JSON.stringify(filtered, null, 2);
+    }
+    else if (!namedBackupsOnly) {
+      json = JSON.stringify(items, null, 2);
+    }
+    else {
+      var backupList, named, backupListItem, backupID, fullBackup;
+
+      backupList = items.backups_list;
+      named      = backupList.filter(listItem => !!listItem.name);
+
+      for (var i = 0; i < named.length; i++) {
+        backupListItem = named[i];
+        backupID       = backupListItem.id;
+        fullBackup     = items[backupID];
+
+        if (fullBackup) {
+          filtered.backups_list.push(backupListItem);
+          filtered[backupID] = fullBackup;
+        }
+      }
+
+      json = JSON.stringify(filtered, null, 2);
+    }
 
     callbackDone(json);
   });
