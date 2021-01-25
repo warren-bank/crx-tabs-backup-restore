@@ -2,7 +2,7 @@
   "name": "Tabs Backup & Restore - Extended",
   "version": "1.2.7",
   "manifest_version": 2,
-  "description": "With 'Tabs Backup & Restore - Extended' you will never lose your work again! Backup an entire Chrome session (windows and tabs).",
+  "description": "Never lose your work again! Backup an entire Chrome session (windows and tabs) both manually and automatically at a fixed interval. Drill down into each backup and inspect its contents. Give each milestone backup a descriptive name, and it becomes safe from automatic garbage collection. Restore any combination of windows and/or individual tabs. Grant the extension permission to access incognito windows, and they are fully supported for both backup and restore!",
   "icons": {
      "16": "icon/icon_16.png",
      "48": "icon/icon_48.png",
@@ -15,6 +15,7 @@
   "options_page": "options.html",
   "browser_action": {
     "default_icon":  "icon/icon_48.png",
+		"default_title": "Tabs Backup & Restore",
     "default_popup": "popup.html"
   },
   "permissions": [
