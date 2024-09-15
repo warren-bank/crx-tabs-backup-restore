@@ -23,5 +23,10 @@
     "storage",
     "tabs",
     "unlimitedStorage"
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "crx-tabs-backup-restore@warren-bank.github.io"
+    }
+  }
 }
