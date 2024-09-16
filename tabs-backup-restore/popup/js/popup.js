@@ -322,17 +322,23 @@ function insertBackupItemDiv (elem, backupListItem, insertAtBeginning, doAnimati
 }
 
 function updateStorageInfo () {
-  chrome.storage.local.getBytesInUse(null, function(bytesInUse) {
-    var storageText;
-    if (bytesInUse < 1024) {
-      storageText = bytesInUse.toFixed(2) + ' bytes';
-    } else if (bytesInUse < 1024 * 1024) {
-      storageText = (bytesInUse / 1024).toFixed(2)  + ' Kb';
-    } else {
-      storageText = (bytesInUse / (1024 * 1024)).toFixed(2) + ' Mb';
-    }
+  try {
+    chrome.storage.local.getBytesInUse(null, function(bytesInUse) {
+      var storageText;
+      if (bytesInUse < 1024) {
+        storageText = bytesInUse.toFixed(2) + ' bytes';
+      } else if (bytesInUse < 1024 * 1024) {
+        storageText = (bytesInUse / 1024).toFixed(2)  + ' Kb';
+      } else {
+        storageText = (bytesInUse / (1024 * 1024)).toFixed(2) + ' Mb';
+      }
 
-    var storageSpan = document.getElementById('storageSpan');
-    storageSpan.innerHTML = storageText;
-  });
+      var storageSpan = document.getElementById('storageSpan');
+      storageSpan.innerHTML = storageText;
+    });
+  }
+  catch(e) {
+    var storageDiv = document.getElementById('storageDiv');
+    storageDiv.style.display = 'none'
+  }
 }
