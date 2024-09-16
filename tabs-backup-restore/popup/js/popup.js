@@ -101,7 +101,7 @@ function menu_backupNow () {
 
   lastTimeBackupNowClicked = Date.now();
 
-  chrome.extension.getBackgroundPage().backupNowManual(function(success, backupListItem, fullBackup) {
+  state.bg_window.backupNowManual(function(success, backupListItem, fullBackup) {
     if (success) {
       insertBackupItem (backupListItem, fullBackup, true /*insertAtBeginning*/, true /*doAnimation*/);
       updateStorageInfo();
@@ -174,7 +174,7 @@ function insertBackupItem (backupListItem, fullBackup, insertAtBeginning, doAnim
           if (name !== null) {
             name = name.trim();
 
-            chrome.extension.getBackgroundPage().renameBackup(backupListItem, name, function() {
+            state.bg_window.renameBackup(backupListItem, name, function() {
             });
 
             event.target.innerText = name || backupListItem.id;
@@ -200,7 +200,7 @@ function insertBackupItem (backupListItem, fullBackup, insertAtBeginning, doAnim
 
       bootbox.confirm(`Restore Backup?<br><code>${ backupListItem.name || backupListItem.id }</code>`, function(confirmed) {
         if (confirmed) {
-          chrome.extension.getBackgroundPage().restoreNow(backupListItem);
+          state.bg_window.restoreNow(backupListItem);
         }
       });
     };
@@ -214,7 +214,7 @@ function insertBackupItem (backupListItem, fullBackup, insertAtBeginning, doAnim
 
       bootbox.confirm(`Delete Backup?<br><code>${ backupListItem.name || backupListItem.id }</code>`, function(confirmed) {
         if (confirmed) {
-          chrome.extension.getBackgroundPage().deleteBackup(backupListItem, function() {
+          state.bg_window.deleteBackup(backupListItem, function() {
             updateStorageInfo();
           });
 

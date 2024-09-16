@@ -660,3 +660,99 @@ function insertBackupItems (backupListItemArray, fullBackupArray, insertAtBeginn
     }
   }
 }
+
+// -----------------------------------------------------------------------------
+// message sent from proxy
+
+if (typeof browser !== 'undefined') {
+  browser.runtime.onMessage.addListener((message) => {
+    if (message && (typeof message === 'object') && message.method) {
+      switch(message.method) {
+
+        case "createWindow": {
+            const {urlsToOpen, isIncognito} = message.params
+            return new Promise((resolve, reject) => {
+              const callback = (createdWindow) => {
+                const windowId = createdWindow ? createdWindow.id : null
+                resolve({windowId})
+              }
+              createWindow(urlsToOpen, isIncognito, callback)
+            })
+          }
+          break
+
+        case "importJsonData": {
+            const {json} = message.params
+            return new Promise((resolve, reject) => {
+              const callbackDone = (isSuccess, backupListItemArray, fullBackupArray) => {
+                resolve({isSuccess, backupListItemArray, fullBackupArray})
+              }
+              importJsonData(json, callbackDone)
+            })
+          }
+          break
+
+        case "getExportJsonData": {
+            const {namedBackupsOnly} = message.params
+            return new Promise((resolve, reject) => {
+              const callbackDone = (json) => {
+                resolve({json})
+              }
+              getExportJsonData(namedBackupsOnly, callbackDone)
+            })
+          }
+          break
+
+        case "backupNowManual": {
+            return new Promise((resolve, reject) => {
+              const callbackDone = (isSuccess, backupListItem, fullBackup) => {
+                resolve({isSuccess, backupListItem, fullBackup})
+              }
+              backupNowManual(callbackDone)
+            })
+          }
+          break
+
+        case "deleteAllBackups": {
+            return new Promise((resolve, reject) => {
+              const callbackDone = (isSuccess) => {
+                resolve({isSuccess})
+              }
+              deleteAllBackups(callbackDone)
+            })
+          }
+          break
+
+        case "deleteBackup": {
+            const {backupListItem} = message.params
+            return new Promise((resolve, reject) => {
+              deleteBackup(backupListItem, resolve)
+            })
+          }
+          break
+
+        case "renameBackup": {
+            const {backupListItem, name} = message.params
+            return new Promise((resolve, reject) => {
+              renameBackup(backupListItem, name, resolve)
+            })
+          }
+          break
+
+        case "restoreNow": {
+            const {backupListItem} = message.params
+            restoreNow(backupListItem, name)
+            return Promise.resolve(true)
+          }
+          break
+
+        case "initAlarm": {
+            initAlarm()
+            return Promise.resolve(true)
+          }
+          break
+      }
+    }
+    return false
+  })
+}

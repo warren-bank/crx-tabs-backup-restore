@@ -103,7 +103,7 @@ function menu_backupNow () {
 
   lastTimeBackupNowClicked = Date.now();
 
-  chrome.extension.getBackgroundPage().backupNowManual(function(success, backupListItem, fullBackup) {
+  state.bg_window.backupNowManual(function(success, backupListItem, fullBackup) {
     if (success) {
       insertBackupItem (backupListItem, fullBackup, true /*insertAtBeginning*/, true /*doAnimation*/);
       updateStorageInfo();
@@ -176,7 +176,7 @@ function insertBackupItem (backupListItem, fullBackup, insertAtBeginning, doAnim
           if (name !== null) {
             name = name.trim();
 
-            chrome.extension.getBackgroundPage().renameBackup(backupListItem, name, function() {
+            state.bg_window.renameBackup(backupListItem, name, function() {
             });
 
             event.target.innerText = name || backupListItem.id;
@@ -202,7 +202,7 @@ function insertBackupItem (backupListItem, fullBackup, insertAtBeginning, doAnim
 
       bootbox.confirm(`Restore Backup?<br><code>${ backupListItem.name || backupListItem.id }</code>`, function(confirmed) {
         if (confirmed) {
-          chrome.extension.getBackgroundPage().restoreNow(backupListItem);
+          state.bg_window.restoreNow(backupListItem);
         }
       });
     };
@@ -216,7 +216,7 @@ function insertBackupItem (backupListItem, fullBackup, insertAtBeginning, doAnim
 
       bootbox.confirm(`Delete Backup?<br><code>${ backupListItem.name || backupListItem.id }</code>`, function(confirmed) {
         if (confirmed) {
-          chrome.extension.getBackgroundPage().deleteBackup(backupListItem, function() {
+          state.bg_window.deleteBackup(backupListItem, function() {
             updateStorageInfo();
           });
 
@@ -464,7 +464,7 @@ function menu_RestoreSelected_Real () {
       checkbox  = $(`input[type="checkbox"][data-window-index="${ windowsKeys[i].windowIdx }"]`).get(0);
       incognito = checkbox && checkbox.tbrIsIncognito;
 
-      chrome.extension.getBackgroundPage().createWindow(urls, incognito, function(createdWindow) {
+      state.bg_window.createWindow(urls, incognito, function(createdWindow) {
       });
     }
   } else {
@@ -480,7 +480,7 @@ function menu_RestoreSelected_Real () {
       true
     );
 
-    chrome.extension.getBackgroundPage().createWindow(allUrls, incognito, function(createdWindow) {
+    state.bg_window.createWindow(allUrls, incognito, function(createdWindow) {
     });
   }
 }
@@ -740,7 +740,7 @@ function menu_DeleteAllBackups (event) {
   event.stopPropagation();
   event.stopImmediatePropagation();
 
-  chrome.extension.getBackgroundPage().deleteAllBackups(function(success) {
+  state.bg_window.deleteAllBackups(function(success) {
     if (success) {
       $('#backupsDiv').slideUp(400, function() {
         // force a page refresh
@@ -774,7 +774,7 @@ function menu_ExportJsonData (event) {
       if (result !== null) {
         var namedBackupsOnly = (result === '2');
 
-        chrome.extension.getBackgroundPage().getExportJsonData(namedBackupsOnly, function(json) {
+        state.bg_window.getExportJsonData(namedBackupsOnly, function(json) {
           var anchor   = document.createElement('a');
           var blob     = new Blob([json], {type: 'octet/stream'});
           var filename = 'full_export.json';
@@ -811,7 +811,7 @@ function menu_ImportJsonData (event) {
       reader.onload = function(){
         var json = reader.result;
 
-        chrome.extension.getBackgroundPage().importJsonData(json, function(isSuccess, backupListItemArray, fullBackupArray) {
+        state.bg_window.importJsonData(json, function(isSuccess, backupListItemArray, fullBackupArray) {
           if (isSuccess) {
             dialog.modal('hide');
 
