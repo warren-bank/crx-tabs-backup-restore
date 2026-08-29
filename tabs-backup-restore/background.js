@@ -454,34 +454,6 @@ function restoreNow(backupListItem) {
   });
 }
 
-var tabsLoading = [];
-
-function onTabUpdate (tabId, changeInfo, tab) {
-  if (!tabId || !changeInfo || !changeInfo.url || !tab) {
-    return;
-  }
-
-  var index = tabsLoading.indexOf(tabId);
-  if (index === -1) {
-    return;
-  }
-
-  tabsLoading.splice(index, 1);
-
-  // lazy load non-visible tabs to reduce/defer CPU and RAM usage.
-  // similar to:
-  //   https://github.com/jman/lazy_tab
-
-  if (!tab.discarded && !tab.pinned && !tab.active) {
-    try {
-      chrome.tabs.discard( tab.id );
-    }
-    catch(error) {}
-  }
-}
-
-chrome.tabs.onUpdated.addListener(onTabUpdate);
-
 function createWindow (urlsToOpen, isIncognito, callback) {
   if (!urlsToOpen || !Array.isArray(urlsToOpen) || !urlsToOpen.length) {
     if (callback) {
@@ -490,23 +462,74 @@ function createWindow (urlsToOpen, isIncognito, callback) {
     return;
   }
 
+  var repopulateTabs = function(createdWindow) {
+    updateEmptyTab(createdWindow.id, createdWindow.tabs[0].id);
+  };
+
+  var updateEmptyTab = function(windowId, tabId, urlIndex) {
+    if (!urlIndex) urlIndex = 0;
+    if (urlIndex >= urlsToOpen.length) return;
+
+    try {
+      chrome.tabs.update(tabId, {url: urlsToOpen[urlIndex]}, function(updatedTab) {
+        if (!updatedTab) {
+          // Error: Illegal URL
+          updateEmptyTab(windowId, tabId, urlIndex + 1);
+        }
+        else {
+          tabCallback(updatedTab);
+          createTabs(windowId, urlIndex + 1);
+        }
+      });
+    }
+    catch(error) {
+      updateEmptyTab(windowId, tabId, urlIndex + 1);
+    }
+  };
+
+  var createTabs = function(windowId, urlIndex) {
+    if (!urlIndex) return;
+    if (urlIndex >= urlsToOpen.length) return;
+
+    var tabProperties = {windowId: windowId, url: null};
+
+    for (var i = urlIndex; i < urlsToOpen.length; i++) {
+      tabProperties.url = urlsToOpen[i];
+
+      try {
+        chrome.tabs.create(tabProperties, tabCallback);
+      }
+      catch(error) {}
+    }
+  };
+
+  var tabCallback = function(tab) {
+    if (!tab) return;
+
+    // lazy load non-visible tabs to reduce/defer CPU and RAM usage.
+    // similar to:
+    //   https://github.com/jman/lazy_tab
+
+    if (!tab.discarded && !tab.pinned && !tab.active) {
+      try {
+        chrome.tabs.discard( tab.id );
+      }
+      catch(error) {}
+    }
+  };
+
   var windowProperties = {
-    url:       urlsToOpen,
     incognito: !!isIncognito,
     type:      'normal',
     state:     'maximized'
   };
 
   chrome.windows.create(windowProperties, function(createdWindow) {
-    if (createdWindow && createdWindow.tabs) {
-      for (var i = 0; i < createdWindow.tabs.length; i++) {
-        tabsLoading.push( createdWindow.tabs[i].id );
-      }
-    }
+    if (!createdWindow) return;
 
-    if (callback) {
-      callback(createdWindow);
-    }
+    repopulateTabs(createdWindow);
+
+    if (callback) callback(createdWindow);
   });
 }
 
