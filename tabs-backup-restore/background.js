@@ -503,18 +503,27 @@ function createWindow (urlsToOpen, isIncognito, callback) {
     }
   };
 
+  var prevTabIds = [];
+
   var tabCallback = function(tab) {
     if (!tab) return;
 
     // lazy load non-visible tabs to reduce/defer CPU and RAM usage.
+    // mark active tab as pending, but discard only after a new tab becomes active.
     // similar to:
     //   https://github.com/jman/lazy_tab
 
-    if (!tab.discarded && !tab.pinned && !tab.active) {
+    while (prevTabIds.length) {
       try {
-        chrome.tabs.discard( tab.id );
+        chrome.tabs.discard(
+          prevTabIds.shift()
+        );
       }
       catch(error) {}
+    }
+
+    if (!tab.discarded && !tab.pinned) {
+      prevTabIds.push(tab.id);
     }
   };
 
