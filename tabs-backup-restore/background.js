@@ -463,44 +463,19 @@ function createWindow (urlsToOpen, isIncognito, callback) {
   }
 
   var repopulateTabs = function(createdWindow) {
-    updateEmptyTab(createdWindow.id, createdWindow.tabs[0].id);
-  };
-
-  var updateEmptyTab = function(windowId, tabId, urlIndex) {
-    if (!urlIndex) urlIndex = 0;
-    if (urlIndex >= urlsToOpen.length) return;
-
-    try {
-      chrome.tabs.update(tabId, {url: urlsToOpen[urlIndex]}, function(updatedTab) {
-        if (!updatedTab) {
-          // Error: Illegal URL
-          updateEmptyTab(windowId, tabId, urlIndex + 1);
-        }
-        else {
-          tabCallback(updatedTab);
-          createTabs(windowId, urlIndex + 1);
-        }
-      });
-    }
-    catch(error) {
-      updateEmptyTab(windowId, tabId, urlIndex + 1);
-    }
-  };
-
-  var createTabs = function(windowId, urlIndex) {
-    if (!urlIndex) return;
-    if (urlIndex >= urlsToOpen.length) return;
-
-    var tabProperties = {windowId: windowId, url: null};
-
-    for (var i = urlIndex; i < urlsToOpen.length; i++) {
-      tabProperties.url = urlsToOpen[i];
-
+    for (var i = 0; i < urlsToOpen.length; i++) {
       try {
-        chrome.tabs.create(tabProperties, tabCallback);
+        chrome.tabs.create(
+          {windowId: createdWindow.id, url: urlsToOpen[i]},
+          tabCallback
+        );
       }
       catch(error) {}
     }
+
+    chrome.tabs.remove(
+      createdWindow.tabs[0].id
+    );
   };
 
   var prevTabIds = [];
